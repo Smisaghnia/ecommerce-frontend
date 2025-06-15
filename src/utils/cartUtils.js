@@ -1,41 +1,52 @@
+// Schlüssel für LocalStorage
+const CART_KEY = "cart";
+
+// Warenkorb aus LocalStorage holen oder leeren Array
+export function getCart() {
+  const cart = localStorage.getItem(CART_KEY);
+  return cart ? JSON.parse(cart) : [];
+}
+
+// Warenkorb in LocalStorage speichern
+export function saveCart(cart) {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
 // Produkt zum Warenkorb hinzufügen
 export function addToCart(product) {
-  const storedCart = localStorage.getItem("cart");
-  const cart = storedCart ? JSON.parse(storedCart) : [];
+  const cart = getCart();
+  const existingItem = cart.find(item => item.id === product.id);
 
-  const existingProductIndex = cart.findIndex(item => item.id === product.id);
-
-  if (existingProductIndex !== -1) {
-    cart[existingProductIndex].quantity += 1;
+  if (existingItem) {
+    existingItem.quantity++;
   } else {
-    // Preis als Zahl speichern
-    cart.push({ ...product, price: Number(product.price), quantity: 1 });
+    cart.push({ ...product, quantity: 1 });
   }
 
-  localStorage.setItem("cart", JSON.stringify(cart));
-  window.dispatchEvent(new Event("storage"));
+  saveCart(cart);
+  window.dispatchEvent(new Event("cartUpdated"));
+}
 
+// Produktmenge ändern
+export function updateQuantity(productId, quantity) {
+  let cart = getCart();
+  cart = cart.map(item =>
+    item.id === productId ? { ...item, quantity } : item
+  ).filter(item => item.quantity > 0);
+  saveCart(cart);
+  window.dispatchEvent(new Event("cartUpdated"));
+}
+
+// Produkt aus Warenkorb entfernen
+export function removeFromCart(productId) {
+  let cart = getCart();
+  cart = cart.filter(item => item.id !== productId);
+  saveCart(cart);
+  window.dispatchEvent(new Event("cartUpdated"));
 }
 
 
-// Warenkorb auslesen
-export function getCart() {
-  return JSON.parse(localStorage.getItem("cart")) || [];
-}
-
-// Warenkorb löschen (optional)
 export function clearCart() {
   localStorage.removeItem("cart");
+  window.dispatchEvent(new Event("cartUpdated"));
 }
-
-export function getCartItemCount() {
-  const storedCart = localStorage.getItem("cart");
-  if (!storedCart) return 0;
-
-  const cart = JSON.parse(storedCart);
-
-  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  return totalCount;
-}
-
