@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ WICHTIG!
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -6,34 +7,41 @@ function Login() {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
 
+  const navigate = useNavigate(); // ✅ DEFINITION
+
   const handleLogin = async (e) => {
     e.preventDefault(); // Seite nicht neu laden
     setError("");
 
     try {
       const response = await fetch("http://localhost:8081/api/auth/login", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    email: email,
-    password: password
-  }),
-});
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Login fehlgeschlagen");
       }
 
       const data = await response.json();
-console.log("Token erhalten:", data.token);
+      console.log("Token erhalten:", data.token);
 
-      localStorage.setItem("token", data.token); // Im Browser speichern
-setToken(data.token); // Token in React-State setzen
+      // ✅ Token speichern
+      localStorage.setItem("token", data.token);
+      setToken(data.token);
+
+      // ✅ Weiterleiten nach Login
+      navigate("/checkout");
 
     } catch (err) {
-      setError(err.message);
+      console.error("Login-Fehler:", err.message);
+      setError("Login fehlgeschlagen. Bitte überprüfe deine Daten.");
     }
   };
 

@@ -18,10 +18,7 @@ export default function useCartCount() {
       setCount(calculateCount(cart));
     }
 
-    // Event für Tab-Wechsel
     window.addEventListener("storage", onStorageChange);
-
-    // Optional: eigenes Custom-Event für intra-App Änderungen
     window.addEventListener("cartUpdated", onStorageChange);
 
     return () => {
@@ -30,5 +27,6 @@ export default function useCartCount() {
     };
   }, []);
 
-  return count;
+  return [count, setCount];
 }
+

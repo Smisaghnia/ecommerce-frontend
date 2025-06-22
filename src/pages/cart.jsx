@@ -5,7 +5,9 @@ function Cart() {
   const [cart, setCart] = useState([]);
 
   useEffect(() => {
-    setCart(getCart());
+    const currentCart = getCart();
+  console.log("Aktueller Warenkorb:", currentCart);  // <-- hier checken
+  setCart(currentCart);
   }, []);
 
   const handleQuantityChange = (id, newQty) => {
